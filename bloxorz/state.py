@@ -275,7 +275,7 @@ class TeleportSwitch(ActiveTile):
             box.split(self.first_half_coord, self.second_half_coord)
             other_id = box.get_other_half()
             for diff in NEIGHBOR_TILE:
-                index = (other_id + diff[ROW], other_id + diff[COL])
+                index = (other_id[ROW] + diff[ROW], other_id[COL] + diff[COL])
                 tile = board[index]
                 if tile is not C_ABYSS:
                     board[index] = MergeTile(tile, merge_type=diff[2])
@@ -299,7 +299,7 @@ class Board:
                 **obj['param'])
 
     def copy(self):
-        other = Board('', {})
+        other = Board('\n#', {})
         other.hole = self.hole
         other.row_length = self.row_length
         other.strboard = self.strboard.copy()
@@ -327,7 +327,9 @@ class Board:
 
         if all(x >= 0 for x in index):
             i = self.ravel(index)
-            if self.strboard[i] == C_GREYTILE:
+            if i >= len(self.strboard):
+                return C_ABYSS
+            elif self.strboard[i] == C_GREYTILE:
                 return C_GREYTILE
             elif self.strboard[i] == C_HOLE:
                 return C_HOLE
@@ -355,12 +357,10 @@ class Board:
             raise TypeError(type(value))
 
     def turn_on_bridges(self, on_tiles: set):
-        self.tiles |= on_tiles
         for tile in on_tiles:
             self.strboard[self.ravel(tile)] = C_GREYTILE
 
     def turn_off_bridges(self, off_tiles: set):
-        self.tiles -= off_tiles
         for tile in off_tiles:
             self.strboard[self.ravel(tile)] = C_ABYSS
 
@@ -373,10 +373,14 @@ class State:
     def to_string(self):
         bboard = list(self.board.to_string())
         first_id, second_id = self.box.get_location()
-        first_id = self.board.ravel(first_id)
-        second_id = self.board.ravel(second_id)
-        bboard[first_id] = '1'
-        bboard[second_id] = '2'
+        if all(x >= 0 for x in first_id):
+            first_id = self.board.ravel(first_id)
+            if first_id < len(self.board.strboard):
+                bboard[first_id] = '1'
+        if all(x >= 0 for x in second_id):
+            second_id = self.board.ravel(second_id)
+            if second_id < len(self.board.strboard):
+                bboard[second_id] = '2'
         return ''.join(bboard)
 
     def __str__(self):
@@ -432,7 +436,7 @@ class State:
         other_id = self.box.get_other_half()
 
         for diff in NEIGHBOR_TILE:
-            index = (other_id + diff[ROW], other_id + diff[COL])
+            index = (other_id[ROW] + diff[ROW], other_id[COL] + diff[COL])
             tile = self.board[index]
             if tile is not C_ABYSS:
                 self.board[index] = MergeTile(tile, merge_type=diff[2])
@@ -441,7 +445,7 @@ class State:
         current_id = self.box.get_current_half()
 
         for diff in NEIGHBOR_TILE:
-            index = (current_id + diff[ROW], current_id + diff[COL])
+            index = (current_id[ROW] + diff[ROW], current_id[COL] + diff[COL])
             mtile = self.board[index]
-            if tile is not C_ABYSS:
+            if mtile is not C_ABYSS:
                 self.board[index] = mtile.tile
