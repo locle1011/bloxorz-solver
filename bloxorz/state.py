@@ -234,7 +234,7 @@ class HardSwitch(SoftSwitch):
 
     def activate(self, box: Box, board: Board):
         if box.is_standing():
-            super(HardSwitch, self)._activate(box, board)
+            self._activate(box, board)
 
 
 class MergeTile(ActiveTile):
@@ -243,24 +243,24 @@ class MergeTile(ActiveTile):
     def __init__(self, tile: ActiveTile, merge_type: str):
         self.tile = tile
         if merge_type == 'H':
-            def wrapper(box: Box, board: Board):
-                if self.tile is not C_GREYTILE and self.tile is not C_HOLE:
-                    self.tile.activate(box, board)
-                box.merge_horizontal()
-
+            self.merge = lambda box: box.merge_horizontal()
         elif merge_type == 'V':
-            def wrapper(box: Box, board: Board):
-                if self.tile is not C_GREYTILE and self.tile is not C_HOLE:
-                    self.tile.activate(box, board)
-                box.merge_vertical()
-
+            self.merge = lambda box: box.merge_vertical()
         else:
             raise ValueError('merge_type not found!')
 
-        self._activate = wrapper
-
     def activate(self, box: Box, board: Board):
-        self._activate(box, board)
+        if self.tile is not C_GREYTILE and self.tile is not C_HOLE:
+            self.tile.activate(box, board)
+
+        other_id = box.get_other_half()
+        for diff in NEIGHBOR_TILE:
+            index = (other_id[ROW] + diff[ROW], other_id[COL] + diff[COL])
+            mtile = board[index]
+            if mtile is not C_ABYSS:
+                board[index] = mtile.tile
+
+        self.merge(box)
 
 
 class TeleportSwitch(ActiveTile):
