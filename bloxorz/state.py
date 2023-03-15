@@ -41,9 +41,9 @@ class Box:
         if first_location == second_location:
             self.stand_up()
         elif first_location[ROW] == second_location[ROW] and abs(first_location[COL]-second_location[COL]) == 1:
-            self.lie_vertical()
-        elif first_location[COL] == second_location[COL] and abs(first_location[ROW]-second_location[ROW]) == 1:
             self.lie_horizontal()
+        elif first_location[COL] == second_location[COL] and abs(first_location[ROW]-second_location[ROW]) == 1:
+            self.lie_vertical()
         else:
             self.split(first_location, second_location)
 
