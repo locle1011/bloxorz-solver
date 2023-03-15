@@ -96,7 +96,7 @@ class BFGS(StandardSearch):
             if current.state.is_goal():
                 return self.tracking(current)
             for child in current.children:
-                encoded_child = str(current.state)
+                encoded_child = str(child.state)
                 if encoded_child not in explored:
                     q.put(child)
                     explored.add(encoded_child)
@@ -137,9 +137,9 @@ class BestFS(StandardSearch):
 
         self.root.score = self.f(self.root)
 
-    def heuristic(self, state: State):
-        current = state.box.get_first_half()
-        goal = state.board.hole
+    def heuristic(self, node: Node):
+        current = node.state.box.get_first_half()
+        goal = node.state.board.hole
         return self._distance(current, goal)
 
     def solve(self):
@@ -152,7 +152,7 @@ class BestFS(StandardSearch):
                 return self.tracking(current)
 
             for child in current.children:
-                encoded_child = str(current.state)
+                encoded_child = str(child.state)
                 if encoded_child not in explored:
                     explored.add(encoded_child)
                     child.score = self.f(child)
