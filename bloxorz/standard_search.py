@@ -51,7 +51,7 @@ class DFS(StandardSearch):
             for child in current.children:
                 st.put(child)
 
-        raise Exception("Can not reach goal state.")
+        raise RuntimeError("Can not reach goal state.")
 
 
 class BFS(StandardSearch):
@@ -65,7 +65,7 @@ class BFS(StandardSearch):
             for child in current.children:
                 q.put(child)
 
-        raise Exception("Can not reach goal state.")
+        raise RuntimeError("Can not reach goal state.")
 
 
 class DFGS(StandardSearch):
@@ -83,7 +83,7 @@ class DFGS(StandardSearch):
                     st.put(child)
                     explored.add(encoded_child)
 
-        raise Exception("Can not reach goal state.")
+        raise RuntimeError("Can not reach goal state.")
 
 
 class BFGS(StandardSearch):
@@ -101,7 +101,7 @@ class BFGS(StandardSearch):
                     q.put(child)
                     explored.add(encoded_child)
 
-        raise Exception("Can not reach goal state.")
+        raise RuntimeError("Can not reach goal state.")
 
 
 class BestFS(StandardSearch):
@@ -158,4 +158,4 @@ class BestFS(StandardSearch):
                     child.score = self.f(child)
                     p.put(child)
 
-        raise Exception("Can not reach goal state.")
+        raise RuntimeError("Can not reach goal state.")

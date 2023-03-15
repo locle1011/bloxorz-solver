@@ -290,7 +290,7 @@ class Board:
     def __init__(self, strboard: str, switches: dict):
         self.active_tiles = dict()
         self.strboard = list(strboard.strip())
-        self.row_length = len(strboard[:strboard.index('\n')])
+        self.row_length = len(self.strboard[:self.strboard.index('\n')])
         self.hole = self.strboard.index(C_HOLE)
         self.hole = (self.hole//self.row_length, self.hole % self.row_length)
 
