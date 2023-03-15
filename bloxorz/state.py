@@ -289,9 +289,9 @@ class Board:
 
     def __init__(self, strboard: str, switches: dict):
         self.active_tiles = dict()
-        self.strboard = list(strboard.strip())
-        self.row_length = len(self.strboard[:self.strboard.index('\n')])
-        self.hole = self.strboard.index(C_HOLE)
+        self.strboard = list(strboard)
+        self.row_length = len(strboard[:strboard.index('\n')])+1
+        self.hole = strboard.index(C_HOLE)
         self.hole = (self.hole//self.row_length, self.hole % self.row_length)
 
         for idx, obj in switches.items():
@@ -422,12 +422,12 @@ class State:
                 return False
 
         first_tile = self.board[self.box.get_first_half()]
-        if first_tile is not C_GREYTILE and first_tile is not C_ABYSS:
-            first_tile.activate()
+        if isinstance(first_tile, ActiveTile):
+            first_tile.activate(self.box, self.board)
         if not self.box.is_standing():
             second_tile = self.board[self.box.get_second_half()]
-            if second_tile is not C_GREYTILE and second_tile is not C_ABYSS:
-                second_tile.activate()
+            if isinstance(second_tile, ActiveTile):
+                second_tile.activate(self.box, self.board)
 
         return True
 
