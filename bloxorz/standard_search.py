@@ -72,13 +72,13 @@ class DFGS(StandardSearch):
     def solve(self):
         st = LifoQueue()
         st.put(self.root)
-        explored = set()
+        explored = {self.root.state.encode()}
         while not st.empty():
             current = st.get()
             if current.state.is_goal():
                 return self.tracking(current)
             for child in current.children:
-                encoded_child = str(child.state)
+                encoded_child = child.state.encode()
                 if encoded_child not in explored:
                     st.put(child)
                     explored.add(encoded_child)
@@ -90,13 +90,13 @@ class BFGS(StandardSearch):
     def solve(self):
         q = Queue()
         q.put(self.root)
-        explored = set()
+        explored = {self.root.state.encode()}
         while not q.empty():
             current = q.get()
             if current.state.is_goal():
                 return self.tracking(current)
             for child in current.children:
-                encoded_child = str(child.state)
+                encoded_child = child.state.encode()
                 if encoded_child not in explored:
                     q.put(child)
                     explored.add(encoded_child)
@@ -145,14 +145,14 @@ class BestFS(StandardSearch):
     def solve(self):
         p = PriorityQueue()
         p.put(self.root)
-        explored = set()
+        explored = {self.root.state.encode()}
         while not p.empty():
             current = p.get()
             if current.state.is_goal():
                 return self.tracking(current)
 
             for child in current.children:
-                encoded_child = str(child.state)
+                encoded_child = child.state.encode()
                 if encoded_child not in explored:
                     explored.add(encoded_child)
                     child.score = self.f(child)
