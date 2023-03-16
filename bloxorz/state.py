@@ -35,8 +35,7 @@ class Box:
 
         self.first_half = list(first_location)
         self.second_half = list(second_location)
-        self.current_half = None
-        self.other_half = None
+        self.splitted = False
 
         if first_location == second_location:
             self.stand_up()
@@ -59,27 +58,16 @@ class Box:
     def get_second_half(self):
         return tuple(self.second_half)
 
-    def get_current_half(self):
-        if self.current_half is None:
-            return None
-        return tuple(self.current_half)
-
-    def get_other_half(self):
-        if self.other_half is None:
-            return None
-        return tuple(self.other_half)
-
-    def is_splitting(self):
-        return self.current_half is not None and self.other_half is not None
+    def is_splitted(self):
+        return self.splitted
 
     def is_standing(self):
         return self.first_half == self.second_half
 
     def split(self, first_half_coord, second_half_coord):
-        self.first_half[:] = first_half_coord
-        self.second_half[:] = second_half_coord
-        self.current_half = self.first_half
-        self.other_half = self.second_half
+        self.first_half = list(first_half_coord)
+        self.second_half = list(second_half_coord)
+        self.splitted = True
 
         self.moveLeft = self.moveLeftSingle
         self.moveRight = self.moveRightSingle
@@ -90,28 +78,29 @@ class Box:
         if self.first_half[COL] > self.second_half[COL]:
             self.first_half, self.second_half = self.second_half, self.first_half
         self.lie_horizontal()
-        self.current_half = self.other_half = None
+        self.splitted = False
 
     def merge_vertical(self):
         if self.first_half[ROW] > self.second_half[ROW]:
             self.first_half, self.second_half = self.second_half, self.first_half
         self.lie_vertical()
-        self.current_half = self.other_half = None
+        self.splitted = False
 
     def switch(self):
-        self.current_half, self.other_half = self.other_half, self.current_half
+        if self.is_splitted():
+            self.first_half, self.second_half = self.second_half, self.first_half
 
     def moveLeftSingle(self):
-        self.current_half[COL] -= 1
+        self.first_half[COL] -= 1
 
     def moveRightSingle(self):
-        self.current_half[COL] += 1
+        self.first_half[COL] += 1
 
     def moveUpSingle(self):
-        self.current_half[ROW] -= 1
+        self.first_half[ROW] -= 1
 
     def moveDownSingle(self):
-        self.current_half[ROW] += 1
+        self.first_half[ROW] += 1
 
     def stand_up(self):
         self.moveLeft = self.moveLeftStand
@@ -234,7 +223,7 @@ class HardSwitch(SoftSwitch):
 
     def activate(self, box: Box, board: Board):
         if box.is_standing():
-            self._activate(box, board)
+            super().activate(box, board)
 
 
 class MergeTile(ActiveTile):
@@ -253,7 +242,7 @@ class MergeTile(ActiveTile):
         if self.tile is not C_GREYTILE and self.tile is not C_HOLE:
             self.tile.activate(box, board)
 
-        other_id = box.get_other_half()
+        other_id = box.get_second_half()
         for diff in NEIGHBOR_TILE:
             index = (other_id[ROW] + diff[ROW], other_id[COL] + diff[COL])
             mtile = board[index]
@@ -273,7 +262,7 @@ class TeleportSwitch(ActiveTile):
     def activate(self, box: Box, board: Board):
         if box.is_standing():
             box.split(self.first_half_coord, self.second_half_coord)
-            other_id = box.get_other_half()
+            other_id = box.get_second_half()
             for diff in NEIGHBOR_TILE:
                 index = (other_id[ROW] + diff[ROW], other_id[COL] + diff[COL])
                 tile = board[index]
@@ -416,7 +405,7 @@ class State:
         elif action is Action.DOWN:
             self.box.moveDown()
         elif action is Action.SWITCH:
-            if self.box.is_splitting():
+            if self.box.is_splitted():
                 self.handle_switch()
             else:
                 return False
@@ -433,7 +422,7 @@ class State:
 
     def handle_switch(self):
         self.box.switch()
-        other_id = self.box.get_other_half()
+        other_id = self.box.get_second_half()
 
         for diff in NEIGHBOR_TILE:
             index = (other_id[ROW] + diff[ROW], other_id[COL] + diff[COL])
@@ -441,8 +430,7 @@ class State:
             if tile is not C_ABYSS:
                 self.board[index] = MergeTile(tile, merge_type=diff[2])
 
-        # Current half
-        current_id = self.box.get_current_half()
+        current_id = self.box.get_first_half()
 
         for diff in NEIGHBOR_TILE:
             index = (current_id[ROW] + diff[ROW], current_id[COL] + diff[COL])
