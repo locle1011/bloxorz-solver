@@ -198,24 +198,16 @@ class OrangeTile(ActiveTile):
 class SoftSwitch(ActiveTile):
     symbol = C_SOFTSWITCH
 
-    def __init__(self, on_tiles: set, off_tiles: set, toggle=False):
-        self.on_tiles = set(on_tiles)
-        self.off_tiles = set(off_tiles)
-
-        def trigger(box: Box, board: Board):
-            board.turn_on_bridges(self.on_tiles)
-            board.turn_off_bridges(self.off_tiles)
-
-        if toggle:
-            def toggle_trigger(box: Box, board: Board):
-                trigger(box, board)
-                self.on_tiles, self.off_tiles = self.off_tiles, self.on_tiles
-            self._activate = toggle_trigger
-        else:
-            self._activate = trigger
+    def __init__(self, radio_on=[], radio_off=[], toggle_on=[], toggle_off=[]):
+        self.radio_on = radio_on.copy()
+        self.radio_off = radio_off.copy()
+        self.toggle_on = toggle_on.copy()
+        self.toggle_off = toggle_off.copy()
 
     def activate(self, box: Box, board: Board):
-        self._activate(box, board)
+        board.turn_on_bridges(self.radio_on+self.toggle_on)
+        board.turn_off_bridges(self.radio_off+self.toggle_off)
+        self.toggle_on, self.toggle_off = self.toggle_off, self.toggle_on
 
 
 class HardSwitch(SoftSwitch):
