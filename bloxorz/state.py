@@ -370,14 +370,19 @@ class State:
         bboard = list(self.board.to_string())
         first_id, second_id = self.box.get_location()
         if all(x >= 0 for x in first_id):
-            first_id = self.board.ravel(first_id)
-            if first_id < len(self.board.strboard):
-                bboard[first_id] = '1'
+            rfirst_id = self.board.ravel(first_id)
+            if rfirst_id < len(self.board.strboard):
+                bboard[rfirst_id] = '1'
+
         if all(x >= 0 for x in second_id):
-            second_id = self.board.ravel(second_id)
-            if second_id < len(self.board.strboard):
-                bboard[second_id] = '2'
+            rsecond_id = self.board.ravel(second_id)
+            if rsecond_id < len(self.board.strboard):
+                bboard[rsecond_id] = '2'
+
         return ''.join(bboard)
+
+    def encode(self):
+        return self.board.to_string() + str(self.box.get_location())
 
     def __str__(self):
         return self.to_string()
@@ -386,7 +391,10 @@ class State:
         return self.to_string()
 
     def __hash__(self):
-        return hash(self.to_string())
+        return hash(self.encode())
+
+    def __eq__(self, other):
+        return self.encode() == other.encode()
 
     def copy(self):
         return State(self.box.copy(), self.board.copy())
