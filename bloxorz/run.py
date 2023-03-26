@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
-from stage import *
-from standard_search import DFGS, BestFS, BFGS
+from utils import *
+from standard_search import DFGS, BestFS
 import sys
 import time
 
@@ -19,12 +19,15 @@ class Solution():
 
     def __update(self):
         if self.solver:
-            begin = time.time()
-            self.res = self.solver.solve()
-            end = time.time()
+            # begin = time.time()
+            # self.res = self.solver.solve()
+            # end = time.time()
 
-            self.time = end - begin
+            # self.time = end - begin
+            # self.pathcost = len(self.res) - 1
+            self.res, self.time, self.explore = make_profile(self.solver)
             self.pathcost = len(self.res) - 1
+            # print(self.pathcost, self.time, self.explore)
 
         
 lvl_number = "1"
@@ -37,6 +40,7 @@ astar_solution = Solution(BestFS(s, strategy='a-star'))
 monte_solution = Solution()
 
 res = dfs_solution.res
+
 
 
 print(res[0].to_string())
