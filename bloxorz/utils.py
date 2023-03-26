@@ -1,4 +1,6 @@
+from standard_search import StandardSearch
 from state import Board, Box, State
+import time
 
 C_ABYSS = ' '
 C_GREYTILE = '█'
@@ -7,6 +9,13 @@ C_ORANGETILE = '▒'
 C_SOFTSWITCH = 'O'
 C_HARDSWITCH = 'X'
 C_TELEPORTSWITCH = 'C'
+
+
+def make_profile(solver: StandardSearch):
+    begin = time.time()
+    sol, explored = solver.solve()
+    enlapsed_time = time.time() - begin
+    return sol, enlapsed_time, explored
 
 
 def get_stage(number=0) -> State:
