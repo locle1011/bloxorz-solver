@@ -183,7 +183,7 @@ class Board:
 
 class ActiveTile(ABC):
     @abstractmethod
-    def activate(self, box: Box, board: Board):
+    def activate(self, box: Box, board: Board) -> bool:
         pass
 
 
@@ -193,21 +193,23 @@ class OrangeTile(ActiveTile):
     def activate(self, box: Box, board: Board):
         if box.is_standing():
             board[box.get_first_half()] = C_ABYSS
+            return False
+        return True
 
 
 class SoftSwitch(ActiveTile):
     symbol = C_SOFTSWITCH
 
-    def __init__(self, radio_on=[], radio_off=[], toggle_on=[], toggle_off=[]):
+    def __init__(self, radio_on=[], radio_off=[], toggle=[]):
         self.radio_on = radio_on.copy()
         self.radio_off = radio_off.copy()
-        self.toggle_on = toggle_on.copy()
-        self.toggle_off = toggle_off.copy()
+        self.toggle = toggle.copy()
 
     def activate(self, box: Box, board: Board):
-        board.turn_on_bridges(self.radio_on+self.toggle_on)
-        board.turn_off_bridges(self.radio_off+self.toggle_off)
-        self.toggle_on, self.toggle_off = self.toggle_off, self.toggle_on
+        board.turn_on_bridges(self.radio_on)
+        board.turn_off_bridges(self.radio_off)
+        board.toggle_bridges(self.toggle)
+        return True
 
 
 class HardSwitch(SoftSwitch):
@@ -216,6 +218,8 @@ class HardSwitch(SoftSwitch):
     def activate(self, box: Box, board: Board):
         if box.is_standing():
             super().activate(box, board)
+            return False
+        return True
 
 
 class MergeTile(ActiveTile):
@@ -238,10 +242,18 @@ class MergeTile(ActiveTile):
         for diff in NEIGHBOR_TILE:
             index = (other_id[ROW] + diff[ROW], other_id[COL] + diff[COL])
             if board.is_valid_index(index):
-                mtile = board[index]
-                board[index] = mtile.tile
+                tile = board[index].tile
+                if isinstance(tile, ActiveTile):
+                    board[index] = tile
+                else:
+                    board.active_tiles.pop(index)
+
+        other_tile = board[other_id]
+        if isinstance(other_tile, ActiveTile):
+            other_tile.activate(box, board)
 
         self.merge(box)
+        return False
 
 
 class TeleportSwitch(ActiveTile):
@@ -260,6 +272,8 @@ class TeleportSwitch(ActiveTile):
                 if board.is_valid_index(index):
                     tile = board[index]
                     board[index] = MergeTile(tile, merge_type=diff[2])
+            return False
+        return True
 
 
 class Board:
@@ -306,51 +320,41 @@ class Board:
         return index[COL]+1 < self.row_length and all(x >= 0 for x in index) and self.ravel(index) < len(self.strboard)
 
     def __getitem__(self, index: tuple[int, int]):
-        if index in self.active_tiles.keys():
-            return self.active_tiles[index]
-
-        if all(x >= 0 for x in index):
-            i = self.ravel(index)
-            if i >= len(self.strboard):
-                return C_ABYSS
-            elif self.strboard[i] == C_GREYTILE:
-                return C_GREYTILE
-            elif self.strboard[i] == C_HOLE:
-                return C_HOLE
-            else:
-                return C_ABYSS
-        else:
+        if not self.is_valid_index(index):
             return C_ABYSS
+        elif index in self.active_tiles.keys():
+            return self.active_tiles[index]
+        else:
+            return self.strboard[self.ravel(index)]
 
     def __setitem__(self, index: tuple[int, int], value):
         if not self.is_valid_index(index):
             raise IndexError(index)
 
         i = self.ravel(index)
-        if value in {C_GREYTILE, C_ABYSS, C_HOLE}:
-            if index in self.active_tiles.keys():
-                tile = self.active_tiles[index]
-                if type(tile) is MergeTile and tile.tile != value:
-                    tile.tile = value
-                else:
-                    self.active_tiles.pop(index)
-            self.strboard[i] = value
-        elif isinstance(value, ActiveTile):
+        if isinstance(value, ActiveTile):
             self.active_tiles[index] = value
-            if type(value) is MergeTile:
-                pass
-            else:
+            if type(value) is not MergeTile:
                 self.strboard[i] = type(value).symbol
+        elif value in [C_GREYTILE, C_ABYSS, C_HOLE]:
+            self.active_tiles.pop(index, None)
+            self.strboard[i] = value
         else:
-            raise TypeError(type(value))
+            raise ValueError(value)
 
-    def turn_on_bridges(self, on_tiles: set):
+    def turn_on_bridges(self, on_tiles: list):
         for tile in on_tiles:
             self.strboard[self.ravel(tile)] = C_GREYTILE
 
-    def turn_off_bridges(self, off_tiles: set):
+    def turn_off_bridges(self, off_tiles: list):
         for tile in off_tiles:
             self.strboard[self.ravel(tile)] = C_ABYSS
+
+    def toggle_bridges(self, tiles: list):
+        for tile in tiles:
+            i = self.ravel(tile)
+            v = self.strboard[i]
+            self.strboard[i] = C_GREYTILE if v == C_ABYSS else C_ABYSS
 
 
 class State:
@@ -361,15 +365,14 @@ class State:
     def to_string(self):
         bboard = list(self.board.to_string())
         first_id, second_id = self.box.get_location()
-        if all(x >= 0 for x in first_id):
-            rfirst_id = self.board.ravel(first_id)
-            if rfirst_id < len(self.board.strboard):
-                bboard[rfirst_id] = '1'
 
-        if all(x >= 0 for x in second_id):
-            rsecond_id = self.board.ravel(second_id)
-            if rsecond_id < len(self.board.strboard):
-                bboard[rsecond_id] = '2'
+        if self.board.is_valid_index(first_id):
+            first_id = self.board.ravel(first_id)
+            bboard[first_id] = '1'
+
+        if self.board.is_valid_index(second_id):
+            second_id = self.board.ravel(second_id)
+            bboard[second_id] = '2'
 
         return ''.join(bboard)
 
@@ -418,11 +421,13 @@ class State:
                 return False
 
         first_tile = self.board[self.box.get_first_half()]
+        active_second_tile = True
         if isinstance(first_tile, ActiveTile):
-            first_tile.activate(self.box, self.board)
-        if not self.box.is_standing():
-            second_tile = self.board[self.box.get_second_half()]
-            if isinstance(second_tile, ActiveTile):
+            active_second_tile = first_tile.activate(self.box, self.board)
+
+        second_tile = self.board[self.box.get_second_half()]
+        if isinstance(second_tile, ActiveTile):
+            if active_second_tile and not self.box.is_standing() and not self.box.is_splitted():
                 second_tile.activate(self.box, self.board)
 
         return True
@@ -434,8 +439,11 @@ class State:
         for diff in NEIGHBOR_TILE:
             index = (current_id[ROW] + diff[ROW], current_id[COL] + diff[COL])
             if self.board.is_valid_index(index):
-                mtile = self.board[index]
-                self.board[index] = mtile.tile
+                tile = self.board[index].tile
+                if isinstance(tile, ActiveTile):
+                    self.board[index] = tile
+                else:
+                    self.board.active_tiles.pop(index)
 
         other_id = self.box.get_second_half()
 
