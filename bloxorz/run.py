@@ -3,14 +3,45 @@ import numpy as np
 from stage import *
 from standard_search import DFGS, BestFS, BFGS
 import sys
+import time
 
+
+
+class Solution():
+    def __init__(self, solver=None) -> None:
+        self.time = 0
+        self.pathcost = 0
+        self.explore = 0
+        self.res = []
+        self.solver = solver
+
+        self.__update()
+
+    def __update(self):
+        if self.solver:
+            begin = time.time()
+            self.res = self.solver.solve()
+            end = time.time()
+
+            self.time = end - begin
+            self.pathcost = len(self.res) - 1
+
+        
 lvl_number = "1"
 number = 1
 s = get_stage(number=number)
-solver = BestFS(s, strategy='a-star')
-res = solver.solve()
+# solver = BestFS(s, strategy='a-star')
+# res = solver.solve()
+dfs_solution = Solution(DFGS(s))
+astar_solution = Solution(BestFS(s, strategy='a-star'))
+monte_solution = Solution()
+
+res = dfs_solution.res
+
 
 print(res[0].to_string())
+
+
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -108,11 +139,13 @@ class Text():
         self.rect = None
         self.outFont = outFont
 
-    def render(self, text, left, top):
+    def render(self, text, left=0, top=0, center=None):
         self.font = pygame.font.SysFont(self.font_name, self.size) if (self.outFont == False) else pygame.font.Font(self.font_name, self.size)
         display = self.font.render(text, True, 'black')
         self.rect = display.get_rect()
         self.rect.topleft = (left, top)
+        if (center):
+            self.rect.center = center
         screen.blit(display, self.rect)
         pygame.display.update()
 
@@ -178,8 +211,26 @@ text_3.render('Placeholder DFS', 125, 385 + 15) #Solution DFS
 text_3.render('Placeholder A-star', 125, 425 + 15) #Solution DFS
 text_3.render('Placeholder Monte-Carlo', 125, 465 + 15) #Solution Monte-Carlo
 
-#Path Cost
-text_3.render('0', 350, 470)
+def update_path_time_explore():
+    #Path Cost
+    screen.fill('white', (348, 391, 387, 120))
+    text_3.render(str(dfs_solution.pathcost), center=(390, 410))
+    text_3.render(str(astar_solution.pathcost), center=(390, 450))
+    text_3.render(str(monte_solution.pathcost), center=(390, 490))
+
+    #Elapsed time
+    text_3.render(str(round(dfs_solution.time, 6)) + ' (s)', center=(390 + 150, 410))
+    text_3.render(str(round(astar_solution.time, 6)) + ' (s)', center=(390 + 150, 450))
+    text_3.render(str(round(monte_solution.time, 6)) + ' (s)', center=(390 + 150, 490))
+
+    #Explore node
+    text_3.render(str(dfs_solution.explore), center=(390 + 280, 410))
+    text_3.render(str(astar_solution.explore), center=(390 + 280, 450))
+    text_3.render(str(monte_solution.explore), center=(390 + 280, 490))
+
+update_path_time_explore()
+
+#
 
 """ End: Add Text to screen """
 #Add text to screen - END
@@ -280,29 +331,33 @@ while running:
             running = False
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            # print(event.pos)
             if (dfs_checkbox.rect.collidepoint(event.pos)):
                 dfs_checkbox.collipoint()
                 astar_checkbox.deCheck()
                 monte_checkbox.deCheck()
 
-                solver = DFGS(s)
-                res = solver.solve()
+                # solver = DFGS(s)
+                # res = solver.solve()
+                res = dfs_solution.res
 
             elif (astar_checkbox.rect.collidepoint(event.pos)):
                 astar_checkbox.collipoint()
                 dfs_checkbox.deCheck()
                 monte_checkbox.deCheck()
 
-                solver = BestFS(s, strategy='a-star')
-                res = solver.solve()
+                # solver = BestFS(s, strategy='a-star')
+                # res = solver.solve()
+                res = astar_solution.res
 
             elif (monte_checkbox.rect.collidepoint(event.pos)):
                 monte_checkbox.collipoint()
                 astar_checkbox.deCheck()
                 dfs_checkbox.deCheck()
 
-                solver = BestFS(s, strategy='a-star')
-                res = solver.solve()
+                # solver = BestFS(s, strategy='a-star')
+                # res = solver.solve()
+                res = monte_solution.res
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_BACKSPACE:
@@ -312,8 +367,22 @@ while running:
             elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER: # Handle Enter key
                 number = int(lvl_number)
                 s = get_stage(number=number)
-                solver = BestFS(s, strategy='a-star')
-                res = solver.solve()
+                # solver = BestFS(s, strategy='a-star')
+                # res = solver.solve()
+                dfs_solution = Solution(DFGS(s))
+                astar_solution = Solution(BestFS(s, strategy='a-star'))
+                monte_solution = Solution()
+
+                res = dfs_solution.res
+                if (dfs_checkbox.checked):
+                    res = dfs_solution.res
+                elif (astar_checkbox.checked):
+                    res = astar_solution.res
+                elif (monte_checkbox.checked):
+                    res = monte_solution.res
+
+                update_path_time_explore()
+
                 print(res[0].to_string())
                 maxrow = getMaxRowCol(res[0].to_string())[0]
                 maxcol = getMaxRowCol(res[0].to_string())[1]
