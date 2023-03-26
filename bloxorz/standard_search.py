@@ -37,19 +37,21 @@ class StandardSearch:
         return path
 
     def solve(self):
-        return []
+        return [], 0
 
 
 class DFS(StandardSearch):
     def solve(self):
         st = LifoQueue()
         st.put(self.root)
+        explored = 1
         while not st.empty():
             current = st.get()
             if current.state.is_goal():
-                return self.tracking(current)
+                return self.tracking(current), explored
             for child in current.children:
                 st.put(child)
+                explored += 1
 
         raise RuntimeError("Can not reach goal state.")
 
@@ -58,12 +60,14 @@ class BFS(StandardSearch):
     def solve(self):
         q = Queue()
         q.put(self.root)
+        explored = 1
         while not q.empty():
             current = q.get()
             if current.state.is_goal():
-                return self.tracking(current)
+                return self.tracking(current), explored
             for child in current.children:
                 q.put(child)
+                explored += 1
 
         raise RuntimeError("Can not reach goal state.")
 
@@ -76,7 +80,7 @@ class DFGS(StandardSearch):
         while not st.empty():
             current = st.get()
             if current.state.is_goal():
-                return self.tracking(current)
+                return self.tracking(current), len(explored)
             for child in current.children:
                 encoded_child = child.state.encode()
                 if encoded_child not in explored:
@@ -94,7 +98,7 @@ class BFGS(StandardSearch):
         while not q.empty():
             current = q.get()
             if current.state.is_goal():
-                return self.tracking(current)
+                return self.tracking(current), len(explored)
             for child in current.children:
                 encoded_child = child.state.encode()
                 if encoded_child not in explored:
@@ -149,8 +153,7 @@ class BestFS(StandardSearch):
         while not p.empty():
             current = p.get()
             if current.state.is_goal():
-                return self.tracking(current)
-
+                return self.tracking(current), len(explored)
             for child in current.children:
                 encoded_child = child.state.encode()
                 if encoded_child not in explored:
