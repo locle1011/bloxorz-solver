@@ -417,6 +417,7 @@ class State:
         elif action is Action.SWITCH:
             if self.box.is_splitted():
                 self.handle_switch()
+                return True
             else:
                 return False
 
