@@ -19,15 +19,8 @@ class Solution():
 
     def __update(self):
         if self.solver:
-            # begin = time.time()
-            # self.res = self.solver.solve()
-            # end = time.time()
-
-            # self.time = end - begin
-            # self.pathcost = len(self.res) - 1
             self.res, self.time, self.explore = make_profile(self.solver)
             self.pathcost = len(self.res) - 1
-            # print(self.pathcost, self.time, self.explore)
 
         
 lvl_number = "1"
@@ -40,7 +33,6 @@ astar_solution = Solution(BestFS(s, strategy='a-star'))
 monte_solution = Solution()
 
 res = dfs_solution.res
-
 
 
 print(res[0].to_string())
@@ -123,7 +115,12 @@ start_button_rect = screen.blit(start_button, (15, 315))
 next_button = pygame.image.load(r'asset\next-button.png').convert_alpha()
 next_button = pygame.transform.scale(next_button, (40 * 1.6375, 40))
 
-next_button_rect = screen.blit(next_button, (120, 315))
+next_button_rect = screen.blit(next_button, (225, 315))
+
+pause_button = pygame.image.load(r'asset\sm-pause-button.png').convert_alpha()
+pause_button = pygame.transform.scale(pause_button, (40 * 1.6375, 40))
+
+pause_button_rect = screen.blit(pause_button, (120, 315))
 
 level = pygame.image.load(r'asset\lv-board.png').convert_alpha()
 level = pygame.transform.scale(level, (50, 50 * 4.21))
@@ -283,18 +280,26 @@ def drawState(state=None, init=(0,0)):
             init_x += block_size_w
   
 
+state_index = [0]
 
 def drawAllState(list_state):
     for state in list_state:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if (pause_button_rect.collidepoint(event.pos)):
+                    return None
         
         area_game = pygame.Rect(0, 0, 510, 310)
         drawState(state.to_string(), init=(7,7))
+        global state_index
+        state_index[0] += 1
 
         pygame.display.update(area_game)
         clock.tick(5)
+
+    state_index[0] = [0]
     
 
 drawState(res[0].to_string(), init=(7,7))
@@ -317,8 +322,9 @@ state_index = [0]
 def checkEvent(object, event, state_index):
     if (checkClickEvent(object, check_click)):
         if (event == 'start'):
-            drawAllState(res)
             state_index[0] = 0
+            drawAllState(res)
+            
 
         if (event == 'next'):
             if (state_index[0] >= len(res)):
@@ -326,6 +332,7 @@ def checkEvent(object, event, state_index):
             
             drawState(res[state_index[0]].to_string(), (7, 7))
             state_index[0] += 1
+            
 
 
 running = True
