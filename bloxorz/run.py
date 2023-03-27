@@ -35,7 +35,7 @@ monte_solution = Solution()
 res = dfs_solution.res
 
 
-print(res[0].to_string())
+# print(res[0].to_string())
 
 
 
@@ -62,7 +62,7 @@ def getMaxRowCol(state):
 maxrow = getMaxRowCol(res[0].to_string())[0]
 maxcol = getMaxRowCol(res[0].to_string())[1]
 
-print((maxrow, maxcol))
+# print((maxrow, maxcol))
 
 block_size_w = 500 // maxcol
 block_size_h = 300 // maxrow
@@ -71,6 +71,7 @@ block_size_h = 300 // maxrow
 SCREEN_WIDTH = 750
 SCREEN_HEIGHT = 520
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Bloxorz")
 screen.fill(color = (255, 255, 255))
 pygame.display.update()
 
@@ -105,6 +106,7 @@ hole = objectIMG(r'asset\hole.png')
 hole.scale(block_size_w, block_size_h)
 
 block1 = objectIMG(r'asset\block.png')
+pygame.display.set_icon(block1.img) #Set icon pygame window
 block1.scale(block_size_w, block_size_h)
 
 start_button = pygame.image.load(r'asset\start-button.png').convert_alpha()
@@ -299,7 +301,7 @@ def drawAllState(list_state):
         pygame.display.update(area_game)
         clock.tick(5)
 
-    state_index[0] = [0]
+    state_index[0] = 0
     
 
 drawState(res[0].to_string(), init=(7,7))
@@ -327,6 +329,7 @@ def checkEvent(object, event, state_index):
             
 
         if (event == 'next'):
+            # print('test')
             if (state_index[0] >= len(res)):
                 state_index[0] = 0
             
@@ -394,11 +397,11 @@ while running:
 
                 update_path_time_explore()
 
-                print(res[0].to_string())
+                # print(res[0].to_string())
                 maxrow = getMaxRowCol(res[0].to_string())[0]
                 maxcol = getMaxRowCol(res[0].to_string())[1]
 
-                print((maxrow, maxcol))
+                # print((maxrow, maxcol))
 
                 block_size_w = 500 // maxcol
                 block_size_h = 300 // maxrow
