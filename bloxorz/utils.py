@@ -440,6 +440,110 @@ def get_stage_15():
     return State(box=box, board=board)
 
 
+def get_stage_16():
+    """Passcode: 000241"""
+
+    sboard = """
+ C        ███
+C█C  XX█  █#█
+ C        ███
+             
+  ███   ███  
+  ███████C█  
+  ███   ███  
+"""
+    sboard = sboard[1:]
+
+    box = Box(location=(5, 3))
+    switches = {(5, 9): {'type': C_TELEPORTSWITCH,
+                         'param': {'first_half_coord': (0, 1),
+                                   'second_half_coord': (1, 0)}},
+                (0, 1): {'type': C_TELEPORTSWITCH,
+                         'param': {'first_half_coord': (1, 7),
+                                   'second_half_coord': (1, 5)}},
+                (1, 0): {'type': C_TELEPORTSWITCH,
+                         'param': {'first_half_coord': (1, 2),
+                                   'second_half_coord': (0, 1)}},
+                (2, 1): {'type': C_TELEPORTSWITCH,
+                         'param': {'first_half_coord': (2, 1),
+                                   'second_half_coord': (1, 0)}},
+                (1, 2): {'type': C_TELEPORTSWITCH,
+                         'param': {'first_half_coord': (1, 0),
+                                   'second_half_coord': (1, 2)}},
+                (1, 5): {'type': C_HARDSWITCH,
+                         'param': {'radio_on': [(1, 3), (1, 4)]}},
+                (1, 6): {'type': C_HARDSWITCH,
+                         'param': {'radio_on': [(1, 8), (1, 9)]}}}
+    board = Board(strboard=sboard, switches=switches)
+    return State(box=box, board=board)
+
+
+def get_stage_17():
+    """Passcode: 683596"""
+
+    sboard = """
+███            
+█████████   ███
+███     █████#█
+███         XX█
+███            
+███            
+███    █████X  
+████████   ██  
+█O█        ██  
+███        █X  
+"""
+    sboard = sboard[1:]
+
+    box = Box(location=(1, 1))
+    switches = {(8, 1): {'type': C_SOFTSWITCH,
+                         'param': {'toggle': [(7, 8)]}},
+                (6, 12): {'type': C_HARDSWITCH,
+                          'param': {'radio_on': [(2, 7)]}},
+                (3, 12): {'type': C_HARDSWITCH,
+                          'param': {'radio_off': [(6, 6)]}},
+                (3, 13): {'type': C_HARDSWITCH,
+                          'param': {'radio_on': [(6, 6)]}},
+                (9, 12): {'type': C_HARDSWITCH,
+                          'param': {'radio_on': [(1, 9)],
+                                    'radio_off': [(7, 8)]}}}
+    board = Board(strboard=sboard, switches=switches)
+    return State(box=box, board=board)
+
+
+def get_stage_18():
+    """Passcode: 284933"""
+
+    sboard = """
+       O       
+██O█   █       
+█████  █       
+█O██████  ██  █
+█████   █   █  
+██O█    █   █  
+█       O  ███ 
+█         ██#█ 
+█  X      ████ 
+"""
+    sboard = sboard[1:]
+
+    box = Box(location=(3, 2))
+    switches = {(3, 1): {'type': C_SOFTSWITCH,
+                         'param': {'radio_off': [(3, 8), (3, 9)]}},
+                (1, 2): {'type': C_SOFTSWITCH,
+                         'param': {'radio_off': [(3, 12), (3, 13), (8, 1), (8, 2)]}},
+                (5, 2): {'type': C_SOFTSWITCH,
+                         'param': {'radio_off': [(3, 12), (3, 13), (8, 1), (8, 2)]}},
+                (0, 7): {'type': C_SOFTSWITCH,
+                         'param': {'radio_on': [(3, 8), (3, 9)]}},
+                (6, 8): {'type': C_SOFTSWITCH,
+                         'param': {'radio_on': [(3, 12), (3, 13), (8, 1), (8, 2)]}},
+                (8, 3): {'type': C_HARDSWITCH,
+                         'param': {'toggle': [(4, 5)]}}}
+    board = Board(strboard=sboard, switches=switches)
+    return State(box=box, board=board)
+
+
 def get_stage_23():
     """Passcode: 293486"""
 
