@@ -282,10 +282,10 @@ monte_checkbox.draw(screen, 'black', 2)
 font = pygame.font.Font(r'asset\Bungee-Regular.ttf', 25)
 text_2 = Text(r'asset\Bungee-Regular.ttf', 15, True)
 text_2.render('Result', 15, 350 + 15)
-text_2.render('Solution Path:', 120, 350 + 15)
-text_2.render('Path Cost:', 350, 350 + 15)
-text_2.render('Elapsed Time:', 480, 350 + 15)
-text_2.render('Explore:', 630, 350 + 15)
+# text_2.render('Solution Path:', 120, 350 + 15)
+text_2.render('Path Cost:', 350 - 200, 350 + 15)
+text_2.render('Elapsed Time:', 480 - 180, 350 + 15)
+text_2.render('Explore:', 630 - 160, 350 + 15)
 text_2.render('DFS', 630, 102)
 text_2.render('A-star (A*)', 630, 102 + 41)
 text_2.render('Monte-Carlo', 630, 102 + 41*2)
@@ -296,33 +296,33 @@ text_3.render('A-star (A*)', 15, 430 + 15)
 text_3.render('Monte-Carlo', 15, 470 + 15)
 
 #Solution Path box
-box_solution_Dfs = pygame.Rect(120, 380 + 15, 210, 30)
-box_solution_Astar = pygame.Rect(120, 420 + 15, 210, 30)
-box_solution_Monte = pygame.Rect(120, 460 + 15, 210, 30)
-pygame.draw.rect(screen, (42,42,42), box_solution_Dfs, 1)
-pygame.draw.rect(screen, (42,42,42), box_solution_Astar, 1)
-pygame.draw.rect(screen, (42,42,42), box_solution_Monte, 1)
-pygame.display.update()
-text_3.render('Placeholder DFS', 125, 385 + 15) #Solution DFS
-text_3.render('Placeholder A-star', 125, 425 + 15) #Solution DFS
-text_3.render('Placeholder Monte-Carlo', 125, 465 + 15) #Solution Monte-Carlo
+# box_solution_Dfs = pygame.Rect(120, 380 + 15, 210, 30)
+# box_solution_Astar = pygame.Rect(120, 420 + 15, 210, 30)
+# box_solution_Monte = pygame.Rect(120, 460 + 15, 210, 30)
+# pygame.draw.rect(screen, (42,42,42), box_solution_Dfs, 1)
+# pygame.draw.rect(screen, (42,42,42), box_solution_Astar, 1)
+# pygame.draw.rect(screen, (42,42,42), box_solution_Monte, 1)
+# pygame.display.update()
+# text_3.render('Placeholder DFS', 125, 385 + 15) #Solution DFS
+# text_3.render('Placeholder A-star', 125, 425 + 15) #Solution DFS
+# text_3.render('Placeholder Monte-Carlo', 125, 465 + 15) #Solution Monte-Carlo
 
 def update_path_time_explore():
     #Path Cost
-    screen.fill('white', (348, 391, 387, 120))
-    text_3.render(str(dfs_solution.pathcost), center=(390, 410))
-    text_3.render(str(astar_solution.pathcost), center=(390, 450))
-    text_3.render(str(monte_solution.pathcost), center=(390, 490))
+    screen.fill('white', (127, 388, 464, 120))
+    text_3.render(str(dfs_solution.pathcost), center=(350 - 200 + 40, 410))
+    text_3.render(str(astar_solution.pathcost), center=(350 - 200 + 40, 450 + 3))
+    text_3.render(str(monte_solution.pathcost), center=(350 - 200 + 40, 490 + 3))
 
     #Elapsed time
-    text_3.render(str(round(dfs_solution.time, 6)) + ' (s)', center=(390 + 150, 410))
-    text_3.render(str(round(astar_solution.time, 6)) + ' (s)', center=(390 + 150, 450))
-    text_3.render(str(round(monte_solution.time, 6)) + ' (s)', center=(390 + 150, 490))
+    text_3.render(str(round(dfs_solution.time, 6)) + ' (s)', center=(480 - 180 + 60, 410))
+    text_3.render(str(round(astar_solution.time, 6)) + ' (s)', center=(480 - 180 + 60, 450 + 3))
+    text_3.render(str(round(monte_solution.time, 6)) + ' (s)', center=(480 - 180 + 60, 490 + 3))
 
     #Explore node
-    text_3.render(str(dfs_solution.explore), center=(390 + 280, 410))
-    text_3.render(str(astar_solution.explore), center=(390 + 280, 450))
-    text_3.render(str(monte_solution.explore), center=(390 + 280, 490))
+    text_3.render(str(dfs_solution.explore), center=(630 - 160 + 40, 410))
+    text_3.render(str(astar_solution.explore), center=(630 - 160 + 40, 450 + 3))
+    text_3.render(str(monte_solution.explore), center=(630 - 160 + 40, 490 + 3))
 
 update_path_time_explore()
 
@@ -485,7 +485,7 @@ while running:
                 dfs_solution = Solution(DFGS(s))
                 astar_solution = Solution(BestFS(s, strategy='a-star'))
 
-                if paramMonte(dict_monte[lvl_number]) == {}:
+                if int(lvl_number) > 14 or paramMonte(dict_monte[lvl_number]) == {}:
                     print("No solution with Monte-Carlo")
                     monte_solution.explore = 0
                     monte_solution.pathcost = 0
