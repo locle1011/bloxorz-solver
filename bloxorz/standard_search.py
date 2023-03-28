@@ -142,9 +142,9 @@ class BestFS(StandardSearch):
         self.root.score = self.f(self.root)
 
     def heuristic(self, node: Node):
-        current = node.state.box.get_first_half()
+        first_coord, second_coord = node.state.box.get_location()
         goal = node.state.board.hole
-        return self._distance(current, goal)
+        return (self._distance(first_coord, goal) + self._distance(second_coord, goal))
 
     def solve(self):
         p = PriorityQueue()
