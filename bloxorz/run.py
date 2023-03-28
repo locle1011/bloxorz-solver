@@ -539,11 +539,11 @@ while running:
 
             temp = event.unicode
             if (temp in [str(i) for i in range(0, 10)]):
-                if (int(lvl_number + temp) > 0 and int(lvl_number + temp) < 34):
+                if (int(lvl_number + temp) > 0 and int(lvl_number + temp) < 24):
                     lvl_number += event.unicode
                     
                 else:
-                    lvl_number = '33'
+                    lvl_number = '23'
                 
                 screen.blit(level, (530, 50))
                 
