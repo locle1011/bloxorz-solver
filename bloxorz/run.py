@@ -1,9 +1,11 @@
 import pygame
-import numpy as np
+# import numpy as np
 from utils import *
 from standard_search import DFGS, BestFS
 import sys
-import time
+# import time
+from mcts import MCTS
+import re
 
 
 
@@ -22,7 +24,81 @@ class Solution():
             self.res, self.time, self.explore = make_profile(self.solver)
             self.pathcost = len(self.res) - 1
 
+#dictionary arg for Monte-Carlo
+dict_monte = {
+   "1": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=False,c=1.4",
+
+   "2": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=False,c=1.4",
+
+   "3": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=False,c=1.4",
+
+   "4": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=False,c=1.4",
+
+   "5": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=True,c=1.4",
+
+   "6": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=False,c=1.4",
+
+   "7": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=True,c=1.4",
+
+   "8": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=False,c=1.4",
+
+   "9": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=True,c=1.4",
+
+    "10": "None",
+
+    "11": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=True,c=1.4",
+
+    "12": "None",
+
+    "13": "simulation_number=None,simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=None,is_unique_node=True,c=1.4",
+
+    "14": "simulation_time=1000,max_simulation_depth=30,max_previous_nodes=2,points_list=[0.0,0.5,-0.5],is_unique_node=False,c=1.4"
+}
+
+#Processing param for Monte-Carlo
+def paramMonte(param_monte):
+    pass
+    if (param_monte == 'None'):
+        return {}
+    param = {}
+    # paramlist = param_monte.split(',')
+    paramlist = re.split(r',(?=[^[\]]*(?:\[|$))', param_monte)
+    for paramprime in paramlist:
+        key, value = paramprime.split('=')
+        if (key == 'simulation_number'):
+            if (value == 'None'):
+                value = None
+            else:
+                value = int(value)
+            
+        elif (key == 'points_list'):
+            if (value == 'None'):
+                value = None
+            else:
+                values = []
+                for number in value[1:-1].split(','):
+                    values.append(float(number))
+                value = values
+
+        elif (key == 'is_unique_node'):
+            if (value == "True"):
+                value = True
+            else:
+                value = False
         
+        elif (key == 'c'):
+            value = float(value)
+
+        else:
+            value = int(value)
+        
+        param[key] = value
+
+    # print(param)
+    return param
+
+
+# print(dict_monte[0])
 lvl_number = "1"
 number = 1
 s = get_stage(number=number)
@@ -30,7 +106,8 @@ s = get_stage(number=number)
 # res = solver.solve()
 dfs_solution = Solution(DFGS(s))
 astar_solution = Solution(BestFS(s, strategy='a-star'))
-monte_solution = Solution()
+
+monte_solution = Solution(MCTS(s, **paramMonte(dict_monte[lvl_number])))
 
 res = dfs_solution.res
 
@@ -66,6 +143,22 @@ maxcol = getMaxRowCol(res[0].to_string())[1]
 
 block_size_w = 500 // maxcol
 block_size_h = 300 // maxrow
+
+block_size = block_size_w if block_size_w < block_size_h else block_size_h
+
+block_size_w = block_size
+block_size_h = block_size
+
+max_size_width = block_size_w * maxcol
+padding_x = 510 - max_size_width
+
+initx = padding_x // 2
+
+max_size_height = block_size_h * maxrow
+padding_y = 310 - max_size_height
+
+inity = padding_y // 2
+
 
 # Set up the display
 SCREEN_WIDTH = 750
@@ -254,26 +347,29 @@ def drawState(state=None, init=(0,0)):
     init_y = init[1]
     for i in range(0, len(state)):
         if (state[i] == 'O'):
-            drawBlock_Border(o_plf.img, init_x, init_y, block_size_w, block_size_h)
+            drawBlock_Border(o_plf.img, init_x, init_y, block_size_w+2, block_size_h+2)
             init_x += block_size_w
         elif (state[i] == 'X'):
-            drawBlock_Border(x_plf.img, init_x, init_y, block_size_w, block_size_h)
+            drawBlock_Border(x_plf.img, init_x, init_y, block_size_w+2, block_size_h+2)
             init_x += block_size_w
         elif (state[i] == 'C'):
-            drawBlock_Border(c_plf.img, init_x, init_y, block_size_w, block_size_h)
+            drawBlock_Border(c_plf.img, init_x, init_y, block_size_w+2, block_size_h+2)
             init_x += block_size_w
         elif (state[i] == '█'):
-            drawBlock_Border(platform.img, init_x, init_y, block_size_w, block_size_h,)
+            drawBlock_Border(platform.img, init_x, init_y, block_size_w+2, block_size_h+2)
             init_x += block_size_w
         elif (state[i] == '▒'):
-            drawBlock_Border(platform_org.img, init_x, init_y, block_size_w, block_size_h)
+            drawBlock_Border(platform_org.img, init_x, init_y, block_size_w+2, block_size_h+2)
             init_x += block_size_w
         
         elif (state[i] == '1' or state[i] == '2'):
-            screen.blit(block1.img, (init_x, init_y))
+            # screen.blit(block1.img, (init_x, init_y))
+            drawBlock_Border(block1.img, init_x + 1, init_y + 1, block_size_w, block_size_h)
             init_x += block_size_w
         elif (state[i] == '#'):
-            screen.blit(hole.img, (init_x, init_y))
+            # screen.blit(hole.img, (init_x, init_y))
+            drawBlock_Border(hole.img, init_x, init_y, block_size_w+2, block_size_h+2)
+
             init_x += block_size_w
         elif (state[i] == '\n'):
             init_y += block_size_h
@@ -281,6 +377,8 @@ def drawState(state=None, init=(0,0)):
         elif (state[i] == ' '):
             init_x += block_size_w
   
+    pygame.draw.rect(screen, 'black', (0,0,510,310), 5, 5) #Draw BOX game
+    
 
 state_index = [0]
 
@@ -294,7 +392,7 @@ def drawAllState(list_state):
                     return None
         
         area_game = pygame.Rect(0, 0, 510, 310)
-        drawState(state.to_string(), init=(7,7))
+        drawState(state.to_string(), init=(initx,inity))
         global state_index
         state_index[0] += 1
 
@@ -304,7 +402,7 @@ def drawAllState(list_state):
     state_index[0] = 0
     
 
-drawState(res[0].to_string(), init=(7,7))
+drawState(res[0].to_string(), init=(initx,inity))
 
 check_click = [False]
 def checkClickEvent(object_rect, check_click):
@@ -333,7 +431,8 @@ def checkEvent(object, event, state_index):
             if (state_index[0] >= len(res)):
                 state_index[0] = 0
             
-            drawState(res[state_index[0]].to_string(), (7, 7))
+            if len(res) != 0: 
+                drawState(res[state_index[0]].to_string(), (initx, inity))
             state_index[0] += 1
             
 
@@ -385,7 +484,16 @@ while running:
                 # res = solver.solve()
                 dfs_solution = Solution(DFGS(s))
                 astar_solution = Solution(BestFS(s, strategy='a-star'))
-                monte_solution = Solution()
+
+                if paramMonte(dict_monte[lvl_number]) == {}:
+                    print("No solution with Monte-Carlo")
+                    monte_solution.explore = 0
+                    monte_solution.pathcost = 0
+                    monte_solution.time = 0
+                    monte_solution.res = dfs_solution.res[:0]
+                
+                else:
+                    monte_solution = Solution(MCTS(s, **paramMonte(dict_monte[lvl_number])))
 
                 res = dfs_solution.res
                 if (dfs_checkbox.checked):
@@ -406,13 +514,28 @@ while running:
                 block_size_w = 500 // maxcol
                 block_size_h = 300 // maxrow
 
+                block_size = block_size_w if block_size_w < block_size_h else block_size_h
+
+                block_size_w = block_size
+                block_size_h = block_size
+
+                max_size_width = block_size_w * maxcol
+                padding_x = 510 - max_size_width
+
+                initx = padding_x // 2
+
+                max_size_height = block_size_h * maxrow
+                padding_y = 310 - max_size_height
+
+                inity = padding_y // 2
+
                 scaleObject(object, block_size_w, block_size_h)
                 # platform.scale(block_size_w, block_size_h)
 
                 screen.fill('white', pygame.Rect(0, 0, 515, 315))
                 pygame.draw.rect(screen, 'black', (0,0,510,310), 5, 5) #Draw BOX game
                 
-                drawState(res[0].to_string(), init=(7,7))
+                drawState(res[0].to_string(), init=(initx,inity))
 
             temp = event.unicode
             if (temp in [str(i) for i in range(0, 10)]):
